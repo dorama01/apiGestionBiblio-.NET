@@ -1,0 +1,48 @@
+pipeline {
+    agent {
+        docker {
+            image 'mcr.microsoft.com/dotnet/sdk:8.0' // Image Docker avec .NET 8 SDK
+        }
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/dorama01/apiGestionBiblio-.NET.git'
+            }
+        }
+        stage('Restore Dependencies') {
+            steps {
+                sh 'dotnet restore'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'dotnet build --configuration Release'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'dotnet test'
+            }
+        }
+        stage('Publish') {
+            steps {
+                sh 'dotnet publish -c Release -o ./publish'
+            }
+        }
+        stage('Dockerize') {
+            steps {
+                sh '''
+                docker build -t ton-utilisateur/ton-image-dotnet8:latest .
+                '''
+            }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+                withDockerRegistry([credentialsId: 'docker-hub-creds', url: '']) {
+                    sh 'docker push ton-utilisateur/ton-image-dotnet8:latest'
+                }
+            }
+        }
+    }
+}
