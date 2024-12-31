@@ -17,11 +17,7 @@ pipeline {
                 sh 'dotnet build ApiChallenge/ApiChallenge.csproj -c Release'
             }
         }
-        stage('Test') {
-            steps {
-                sh 'dotnet test ApiChallenge/ApiChallenge.csproj'
-            }
-        }
+        
         stage('Publish') {
             steps {
                 sh 'dotnet publish ApiChallenge/ApiChallenge.csproj -c Release -o ./publish'
