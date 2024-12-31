@@ -1,46 +1,41 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/dotnet/sdk:8.0' // Image Docker avec .NET 8 SDK
-        }
-    }
+    agent any
+
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/dorama01/apiGestionBiblio-.NET.git'
+                checkout scm
             }
         }
         stage('Restore Dependencies') {
             steps {
-                sh 'dotnet restore'
+                sh 'dotnet restore ApiChallenge/ApiChallenge.csproj'
             }
         }
         stage('Build') {
             steps {
-                sh 'dotnet build --configuration Release'
+                sh 'dotnet build ApiChallenge/ApiChallenge.csproj -c Release'
             }
         }
         stage('Test') {
             steps {
-                sh 'dotnet test'
+                sh 'dotnet test ApiChallenge/ApiChallenge.csproj'
             }
         }
         stage('Publish') {
             steps {
-                sh 'dotnet publish -c Release -o ./publish'
+                sh 'dotnet publish ApiChallenge/ApiChallenge.csproj -c Release -o ./publish'
             }
         }
         stage('Dockerize') {
             steps {
-                sh '''
-                docker build -t ton-utilisateur/ton-image-dotnet8:latest .
-                '''
+                sh 'docker build -t douaema/api-challenge:latest .'
             }
         }
         stage('Push to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-creds', url: '']) {
-                    sh 'docker push ton-utilisateur/ton-image-dotnet8:latest'
+                withDockerRegistry([ credentialsId: 'docker-hub-credentials', url: '' ]) {
+                    sh 'docker push douaema/api-challenge:latest'
                 }
             }
         }
